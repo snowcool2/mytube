@@ -2,156 +2,106 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube Video Info</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>원클릭으로 여러 사이트 열기</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-            background-color: #f5f5f5;
+            font-family: sans-serif;
+            text-align: center;
+            padding-top: 50px;
+            background-color: #f4f4f9;
         }
         h1 {
-            text-align: center;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            font-weight: bold;
-            display: block;
-        }
-        input[type="text"] {
-            width: 100%;
-            padding: 8px;
-            margin-top: 5px;
-            border-radius: 4px;
-            border: 1px solid #ccc;
+            font-size: 2.5em;
+            color: #4CAF50;
+            margin-bottom: 20px;
         }
         button {
+            padding: 1em 2em;
+            font-size: 1.2em;
+            cursor: pointer;
             background-color: #4CAF50;
             color: white;
             border: none;
-            padding: 10px 20px;
-            cursor: pointer;
-            border-radius: 4px;
-            width: 100%;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        .output {
+            border-radius: 10px;
             margin-top: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         }
-        .output p {
-            margin: 10px 0;
-            font-size: 16px;
+        .message {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #e74c3c;
+            margin-top: 40px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
         }
-        .output img {
-            max-width: 120px;
-            margin-top: 10px;
+        .instructions {
+            font-size: 1.2em;
+            color: #34495e;
+            margin-top: 20px;
+            line-height: 1.6;
+        }
+        .highlight {
+            font-weight: bold;
+            color: #2980b9;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 600px;
+            margin: auto;
         }
     </style>
 </head>
 <body>
-<h1>YouTube Video Info Fetcher</h1>
-<div class="container">
-    <div class="form-group">
-        <label for="apikey">YouTube API Key:</label>
-        <input type="text" id="apikey" placeholder="Enter your YouTube API Key" />
-    </div>
-    <div class="form-group">
-        <label for="videourl">Video URL or ID:</label>
-        <input type="text" id="videourl" placeholder="Enter Video URL or ID" />
-    </div>
-    <button onclick="fetchVideoInfo()">Fetch Video Info</button>
 
-    <div class="output" id="output">
-        <!-- Results will be displayed here -->
+<div class="container">
+    <h1>📂 링크 한 번에 열기</h1>
+    <p>아래 버튼을 누르면 여러 사이트가 한꺼번에 열립니다.</p>
+    <button onclick="openMultipleUrls()">열기</button>
+
+    <div class="message">
+        📢 **팝업 및 리디렉션을 허용해주세요!** 📢
+    </div>
+    <div class="instructions">
+        크롬 브라우저에서 팝업과 리디렉션을 **허용**해야 여러 개의 사이트가 한 번에 열립니다.
+        <br><br>
+        설정 변경은 주소창 왼쪽의 **<span class="highlight">자물쇠 아이콘</span>** 클릭 후,
+        "팝업 및 리디렉션"을 **<span class="highlight">허용</span>**으로 설정해 주세요!
     </div>
 </div>
 
 <script>
-    function extractVideoId(url) {
-        const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/?([^\/\n\s]+))|youtu\.be\/([^\/\n\s]+))/;
-        const match = url.match(regex);
-        return match ? match[1] || match[2] : url;
-    }
-
-    function fetchVideoInfo() {
-        const apiKey = document.getElementById('apikey').value;
-        const videoUrlInput = document.getElementById('videourl').value;
-
-        if (!apiKey || !videoUrlInput) {
-            alert('Please enter both API Key and Video URL or ID');
-            return;
-        }
-
-        const videoId = extractVideoId(videoUrlInput);
-        if (!videoId) {
-            alert('Invalid YouTube URL or ID');
-            return;
-        }
-
-        const videoUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&key=${apiKey}&id=${videoId}`;
-        const channelUrl = `https://www.googleapis.com/youtube/v3/channels?part=snippet&key=${apiKey}`;
-
-        fetch(videoUrl)
-            .then(response => response.json())
-            .then(videoData => {
-                const videoInfo = videoData.items[0];
-                const channelId = videoInfo.snippet.channelId;
-
-                fetch(`${channelUrl}&id=${channelId}`)
-                    .then(response => response.json())
-                    .then(channelData => {
-                        const channelInfo = channelData.items[0];
-
-                        // Extract data
-                        const channelName = channelInfo.snippet.title;
-                        const channelCountry = channelInfo.snippet.country;
-                        const subscribersCount = channelInfo.statistics.subscriberCount;
-
-                        const videoTitle = videoInfo.snippet.title;
-                        const viewCount = videoInfo.statistics.viewCount;
-                        const likeCount = videoInfo.statistics.likeCount;
-                        const commentCount = videoInfo.statistics.commentCount;
-                        const uploadDate = new Date(videoInfo.snippet.publishedAt).toLocaleDateString('en-US');
-                        const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
-                        const thumbnailUrl = videoInfo.snippet.thumbnails.default.url;
-
-                        // Display output
-                        const outputDiv = document.getElementById('output');
-                        outputDiv.innerHTML = `
-                                <p><strong>1. 채널 이름:</strong> ${channelName}</p>
-                                <p><strong>2. 채널 국가:</strong> ${channelCountry}</p>
-                                <p><strong>3. 채널 구독자수:</strong> ${subscribersCount}</p>
-                                <p><strong>4. 영상 제목:</strong> ${videoTitle}</p>
-                                <p><strong>5. 조회수:</strong> ${viewCount}</p>
-                                <p><strong>6. 좋아요수:</strong> ${likeCount}</p>
-                                <p><strong>7. 댓글수:</strong> ${commentCount}</p>
-                                <p><strong>8. 업로드 날짜:</strong> ${uploadDate}</p>
-                                <p><strong>9. 영상 URL:</strong> <a href="${videoUrl}" target="_blank">${videoUrl}</a></p>
-                                <p><strong>10. 썸네일 URL:</strong> <img src="${thumbnailUrl}" alt="Thumbnail" /></p>
-                            `;
-                    })
-                    .catch(err => {
-                        console.error('Error fetching channel data:', err);
-                        alert('Failed to fetch channel data');
-                    });
-            })
-            .catch(err => {
-                console.error('Error fetching video data:', err);
-                alert('Failed to fetch video data');
-            });
+    function openMultipleUrls() {
+        const urls = [
+            "https://www.youtube.com/watch?v=oLsx3wuiy5c&lc=UgyPvCrqKUeKQvMwlQp4AaABAg",
+            "https://www.youtube.com/watch?v=n-oQSyJhz6c&lc=Ugwpj7vN2tiZmWiuUCF4AaABAg",
+            "https://www.youtube.com/watch?v=2YndZM_gDIg&lc=Ugyhou29ksEEh6VNcLJ4AaABAg",
+            "https://www.youtube.com/watch?v=Glg-Odm_m4I&lc=UgwFMFqwG5Lk3PUaPoZ4AaABAg",
+            "https://www.youtube.com/watch?v=Glg-Odm_m4I&lc=UgwyA5SFmIs9FHLfiV94AaABAg",
+            "https://www.youtube.com/watch?v=AAwePcIGXW4&lc=UgxiM9g-ef-Xbs-8OOp4AaABAg",
+            "https://www.youtube.com/watch?v=2YndZM_gDIg&lc=UgzG5fh1mCmaQ_CuMY54AaABAg",
+            "https://www.youtube.com/watch?v=2YndZM_gDIg&lc=Ugwi51Ky5sM41yVBQah4AaABAg",
+            "https://www.youtube.com/watch?v=2YndZM_gDIg&lc=Ugxgul6uatseT4-5aeh4AaABAg",
+            "https://www.youtube.com/watch?v=DKixDNCxctw&lc=UgxWSW8xGjyM__Mti0t4AaABAg",
+            "https://www.youtube.com/watch?v=2YndZM_gDIg&lc=UgzZ4SJIszDN4p951cF4AaABAg",
+            "https://www.youtube.com/watch?v=2YndZM_gDIg&lc=UgxNPs0zsrrRU2_LOkx4AaABAg",
+            "https://www.youtube.com/watch?v=2YndZM_gDIg&lc=UgzXtWhYvsZHYfNyWjV4AaABAg",
+            "https://www.youtube.com/watch?v=DKixDNCxctw&lc=Ugy4ovj5ZrSMr8jAulZ4AaABAg",
+            "https://www.youtube.com/watch?v=Glg-Odm_m4I&lc=Ugy2xRKZwq0_n_DgNwV4AaABAg",
+            "https://www.youtube.com/watch?v=Glg-Odm_m4I&lc=Ugwn4kEAjDhaiL-achN4AaABAg",
+            "https://www.youtube.com/watch?v=2YndZM_gDIg&lc=UgyGDnPnj0SJ-nvf-Ox4AaABAg",
+            "https://www.youtube.com/watch?v=DKixDNCxctw&lc=UgxCfKH1Mg46SbIGlP54AaABAg",
+            "https://www.youtube.com/watch?v=2YndZM_gDIg&lc=UgwXAmAbi3NMZrdSHWB4AaABAg",
+            "https://www.youtube.com/watch?v=Glg-Odm_m4I&lc=UgxbJGhevPLlNahWHcR4AaABAg"
+        ];
+        urls.forEach(url => window.open(url, '_blank'));
     }
 </script>
+
 </body>
 </html>
